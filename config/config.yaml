@@ -1,0 +1,258 @@
+# ===========================================================================
+# CONFIGURACION GENERAL
+#
+# Objetivo de la busqueda: INVERSION PARA RENTA (vacio / temporario /
+# estudiantes). No es para vivir. Por eso la metrica central es el
+# rendimiento (alquiler estimado / precio), no el precio a secas.
+#
+# Filosofia: se recolecta de mas y NO se descarta casi nada. Casi todo vive
+# en el puntaje, asi que ampliar la busqueda es bajar un umbral, no escribir
+# codigo. Los unicos filtros duros estan en 'filtros_duros'.
+# ===========================================================================
+
+busqueda:
+  operaciones: [venta, alquiler]   # alquiler NO se notifica: alimenta las medianas
+  tipos:       [depto, ph, casa]
+
+precio:
+  # Curva trapezoidal, no un techo seco. Puntaje 1.0 en la meseta ideal,
+  # cae linealmente hacia los bordes y se apaga en 'max_puntuable'.
+  # Se recolecta hasta 'max_recoleccion' igual: algo de 115k que rinda 10%
+  # tiene que llegar, aunque sea al fondo de la lista.
+  ideal_min:       50000
+  ideal_max:       70000
+  cae_desde:       80000
+  max_puntuable:  100000
+  min_puntuable:   25000    # por debajo suele ser error de carga o cochera suelta
+  max_recoleccion: 130000
+
+  # Curva por tipo. Lo que no se declara hereda los valores de arriba.
+  #
+  # OJO con las casas: en estos barrios (Versalles, Villa Devoto, Villa Luro) las
+  # casas arrancan en USD 200.000 y no hay NINGUNA por debajo de 130.000. Con el
+  # techo global el tipo 'casa' esta muerto: se recolecta casi nada y lo poco
+  # que entra puntua 0 en precio. Dos caminos honestos:
+  #   a) poner casa en peso 0 en barrios.yaml y no buscar casas
+  #   b) subir el techo aca, aceptando que es otro presupuesto
+  por_tipo:
+    ph:
+      ideal_min:       45000
+      ideal_max:       75000
+      cae_desde:       90000
+      max_puntuable:  110000
+      max_recoleccion: 140000
+    # casa:
+    #   ideal_min:      120000
+    #   ideal_max:      180000
+    #   cae_desde:      200000
+    #   max_puntuable:  250000
+    #   max_recoleccion: 300000
+
+geo:
+  # Corte de Av. Rivadavia. La poligonal esta en geo.py con precision ~150 m;
+  # la banda de duda de abajo absorbe ese error.
+  banda_duda_m: 300         # a menos de esto de Rivadavia -> pasa, pero marcado
+  # Excepcion de Caballito: se aceptan unas cuadras al sur de Rivadavia.
+  excepcion_caballito:
+    activa: true
+    metros_al_sur: 600
+  # Si no hay direccion geocodificable, se resuelve por barrio:
+  #   barrio entero al norte -> entra
+  #   barrio partido         -> entra marcado "verificar ubicacion"
+  #   barrio entero al sur   -> se descarta
+  aceptar_sin_geocodificar: true
+
+filtros_duros:
+  # Lo unico que hace desaparecer una publicacion. Mantener corto a proposito.
+  # Por defecto no hay innegociables; la capa queda armada y vacia.
+  #
+  # Ejemplos para el futuro (descomentar y ajustar):
+  #   requiere_cochera: false
+  #   sin_expensas_mayores_a: 400000     # ARS
+  #   antiguedad_maxima: 60
+  #   excluir_emprendimientos: true
+  #
+  # Tambien pueden ir por barrio:
+  #   por_barrio:
+  #     Versalles: {requiere_cochera: true}
+  activos: {}
+  por_barrio: {}
+
+  # Lo que se paga por m2 contra la mediana de SU barrio y SU tipo. Arriba de
+  # la mediana no es una oferta: es una propiedad cara en un barrio caro.
+  #
+  # No se borra nada: la publicacion se sigue relevando y su precio se sigue
+  # anotando, asi que el dia que baje por debajo de la mediana vuelve a
+  # aparecer —y aparece con la bajada ya detectada, que es la senal mas valiosa
+  # que tenemos.
+  #
+  # 1.0 = estrictamente por encima de la mediana. 0 apaga el filtro.
+  #
+  # En 1.05 a proposito: con 1.0 se caia el mejor puntaje del dia por estar
+  # 1,07x, y un 5% de diferencia en USD/m2 entra en el ruido de comparar
+  # propiedades que no son identicas. Lo que NO se puede evaluar (sin m2, o
+  # barrio sin mediana para ese tipo) no se descarta.
+  sobre_mediana_m2: 1.05
+
+scoring:
+  # --- Como se combina todo -------------------------------------------------
+  #   peso_efectivo = min(10, peso_barrio_tipo + bonus_pois)
+  #   factor_zona   = (peso_efectivo / 10) ** exponente_zona
+  #   puntaje       = merito * factor_zona
+  #
+  # El exponente < 1 suaviza: la zona ordena pero no aniquila. Subilo a 1.0
+  # para que el barrio pese mas, bajalo a 0.4 para que pese menos.
+  exponente_zona: 0.6
+  bonus_poi_max: 4.0        # saturacion: sumar cinco POIs no vale mas que esto
+
+  # --- Componentes del merito (0..1 cada uno, ponderados) -------------------
+  # Deben sumar 100. Subir uno es declararlo mas importante.
+  pesos:
+    rendimiento:    30      # alquiler estimado / precio  <- el corazon
+    precio:         20      # posicion en la curva de precio
+    precio_m2:      15      # USD/m2 contra la mediana de la zona
+    ambientes:      10      # 1 y 2 ambientes rinden mejor
+    expensas:       10      # se comen la renta
+    señales:        15      # bajada de precio, tiempo publicado, antiguedad
+
+  ambientes_ideales: [1, 2, 3]   # en orden de preferencia para renta
+
+  # Cotas de sanidad para lo que alimenta las medianas de alquiler. No es un
+  # filtro de gusto: es que en los portales entra basura con forma de alquiler.
+  #
+  # Por abajo: cocheras, modulos odontologicos, "valor por noche" y precios en
+  # pesos mal cargados que quedan en centavos de dolar.
+  # Por arriba: avisos de "venta y alquiler" donde el portal muestra el precio
+  # de VENTA en el listado de alquileres. Son los que importan: un alquiler de
+  # USD 300.000 mensuales en una celda con pocas muestras corre la mediana, y
+  # de esa mediana sale el rendimiento, que es el corazon del puntaje.
+  #
+  # El techo es alto a proposito: en Nunez y Palermo hay alquileres reales de
+  # USD 8.000 y 12.000 (Chateau Libertador, pisos de 400 m2). Se cortan los
+  # imposibles, no los caros.
+  alquiler_plausible:
+    min_usd:    150
+    max_usd:  20000
+
+  rendimiento:
+    # Rendimiento bruto anual = alquiler_mensual * 12 / precio.
+    # Se compara contra la mediana de la zona; sin base todavia -> neutral.
+    excelente: 0.09         # 9% anual o mas -> puntaje 1
+    pobre:     0.04         # 4% o menos     -> puntaje 0
+    implausible_desde: 0.20 # arriba de esto no es una ganga, es un dato mal cargado:
+                            # se marca en el informe y no suma puntaje
+    meses_ocupacion_temporario: 9   # supuesto conservador para el modo AirBnB
+    premium_temporario: 1.8         # cuanto rinde el temporario vs vacio
+
+  expensas:
+    # Se miran dos cosas distintas:
+    #
+    #   carga  -> expensas / alquiler estimado. Cuanto se come de la renta.
+    #   pares  -> expensas por m2 contra edificios parecidos (mismo barrio,
+    #             mismo tipo, superficie similar). Expensas muy arriba de los
+    #             pares suelen ser sintoma: administracion cara, un juicio,
+    #             una obra grande en curso, amenities que no se usan.
+    #
+    # No se promedian: la carga manda y los pares la ajustan +/- este peso. Con
+    # el promedio, un depto de Recoleta con expensas del 36% del alquiler subia
+    # de puntaje porque para Recoleta son normales, y que el barrio entero sea
+    # caro no lo vuelve mejor negocio.
+    #
+    # Pesa poco a proposito: las expensas varian legitimamente por tamano del
+    # edificio y por servicios, asi que sirve para desempatar entre propiedades
+    # parecidas, no para hundir a una.
+    peso_pares: 0.3
+
+    # --- carga sobre la renta ---
+    comodas: 0.15
+    ahogan:  0.35
+
+    # --- contra edificios parecidos ---
+    # Los cortes salen de la distribucion real de 10.507 avisos con expensas:
+    # la mediana es 3.696 ARS/m2, el p25 da 0,69 veces la mediana y el p75 1,35.
+    # Recien el p95 llega a 2 veces, asi que ahi esta el corte de "muy caras".
+    baratas: 0.80          # 20% abajo de los pares o menos -> 1
+    caras:   2.00          # el doble que los pares o mas   -> 0
+    neutro:  0.60          # cuanto vale estar justo en la mediana
+    # Abajo de este limite no se calcula nada: cuatro edificios no son una
+    # referencia, y una mediana de cuatro dice mas del ruido que del barrio.
+    muestra_minima: 8
+    recorte_percentil: 2   # se tira ese % de cada cola antes de la mediana
+    # Banda de plausibilidad, en veces la mediana del tipo. Afuera de esto el
+    # dato no se usa NI PARA BIEN NI PARA MAL: se avisa que hay que mirarlo, que
+    # es lo mismo que se hace con los rendimientos de 40%. Hay avisos con
+    # expensas de $15.595.100 en un 2 ambientes (el precio metido en el campo
+    # equivocado) y otros con expensas de $1, que es "no tiene" mal cargado.
+    # Sin esta banda, ese $1 se llevaba el puntaje maximo por "baratisimas".
+    implausible_bajo: 0.15
+    implausible_alto: 4.0
+    bandas_m2: [40, 70, 110]
+    # Si dentro de un grupo el p75 y el p25 se llevan mas que esto, el grupo no
+    # tiene un valor tipico y no sirve de referencia: se descarta entero. Saca
+    # al PH, donde se mezclan los que estan en consorcio con los que no.
+    dispersion_maxima: 2.5
+    # Solo se escribe el motivo cuando el desvio es notable; si no, cada aviso
+    # arrastraria una linea de expensas que no dice nada.
+    avisar_caras:   1.50
+    avisar_baratas: 0.70
+
+  señales:
+    bonus_bajada_precio: 1.0     # bajo de precio desde que lo vemos: senal fuerte
+    bonus_publicada_hace_mucho: 0.5   # vendedor cansado
+    dias_para_considerar_estancada: 90
+    penaliza_antiguedad_desde: 60     # anios
+
+fuentes:
+  # Cada fuente es independiente: si una se rompe o la bloquean, las demas
+  # siguen y el informe avisa que esa quedo ciega.
+  mercadolibre:
+    activa: true
+    paginas_max: 8            # 48 avisos por pagina
+    paginas_max_alquiler: 3   # el alquiler solo alimenta medianas: no hace falta barrerlo entero
+    espera_seg: [3, 7]        # jitter entre pedidos
+  argenprop:
+    activa: true
+    paginas_max: 3
+    paginas_max_alquiler: 2
+    espera_seg: [12, 25]    # OJO: CloudFront bloquea por IP con ritmo agresivo.
+                            # Si te bloquea, subi estos numeros. Ver README.
+  zonaprop:
+    # La mejor fuente: trae lat/lon exactas, expensas y antiguedad en un JSON
+    # embebido. Ojo: el sufijo de precio es "-dolar", no "-dolares" (con
+    # "-dolares" descarta el barrio y devuelve toda Argentina, sin avisar).
+    activa: true
+    paginas_max: 4            # por banda de precio
+    paginas_max_alquiler: 4
+    espera_seg: [6, 12]
+    # Se recorre por bandas en vez de ordenar por precio, porque el orden
+    # ascendente pone primero los "consultar precio" y desperdicia paginas.
+    bandas_usd: [25000, 45000, 60000, 75000, 95000, 130000]
+
+cotizacion:
+  casa: bolsa        # bolsa (MEP) | blue | oficial. Para pasar alquileres en $ a USD.
+  respaldo: 1540     # si dolarapi.com no responde
+
+recoleccion:
+  reintentos: 2
+  # Tope de pedidos por corrida. El plan se ordena por peso de barrio, asi que
+  # si se corta, se corta por los barrios que menos te importan.
+  pedidos_max_por_corrida: 1600   # el backfill inicial es caro; en regimen sobra con ~300
+  timeout_seg: 40
+  # Si una fuente devuelve mas de esto en errores seguidos, se la marca ciega
+  # y se corta, para no insistirle a un portal que nos esta bloqueando.
+  errores_para_abortar: 4
+
+notificacion:
+  # Umbral de aviso de Telegram (0-100). Bajarlo avisa de mas; subirlo, de menos.
+  umbral: 80
+  maximo_por_aviso: 12      # si un dia entran mas, se manda el top y se dice cuantos quedaron
+  incluir_bajadas_de_precio: true   # una bajada avisa aunque no llegue al umbral
+
+salida:
+  directorio: salida
+  top_detallado: 25         # cuantos van con ficha completa en el informe
+  web_puntaje_minimo: 0     # la web local (python -m inmobiliario web) muestra lo que
+                            # llegue a este puntaje; 0 = todo lo puntuado
+  geocodificar_top: 800     # a cuantos candidatos se les resuelve la direccion exacta.
+                            # Subirlo mejora la precision abajo del ranking y cuesta
+                            # tiempo de geocodificador; bajarlo acelera el informe.

@@ -1,0 +1,4 @@
+exclusiones:
+  ids: []          # ids puntuales descartados
+  direcciones: []  # edificios enteros ya vistos, ej: "Emilio Mitre 400"
+  palabras: []     # si aparece en el titulo, se descarta. ej: "cochera", "lote"

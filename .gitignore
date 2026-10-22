@@ -1,0 +1,24 @@
+# Datos generados: la base es el activo real pero se reconstruye corriendo el
+# sistema, y pesa. Los informes y logs son salida, no fuente.
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+salida/
+
+# Entornos virtuales y cachés de Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Credenciales (token del bot de Telegram) y archivos de usuario
+config/credenciales.json
+config/usuarios.yaml
+*.env
+
+# Sistema operativo / editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

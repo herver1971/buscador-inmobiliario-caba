@@ -1,0 +1,12 @@
+# Dispara la corrida todos los días de madrugada. Persistent=true hace que, si la
+# compu estaba apagada a esa hora, corra apenas se prenda en vez de saltearse.
+[Unit]
+Description=Corrida diaria del buscador inmobiliario
+
+[Timer]
+OnCalendar=*-*-* 01:30:00
+RandomizedDelaySec=30min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

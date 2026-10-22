@@ -1,0 +1,203 @@
+/* Estilos de la web local: barra, filtros, fichas y mapa. */
+:root{--papel:#f6f8fa;--panel:#fff;--panel2:#eef2f6;--tinta:#16202b;--tinta2:#4a5a6a;
+--tinta3:#7a8896;--linea:#dce3ea;--acento:#1f5c8b;--acento2:#e3edf5;
+--alto:#1b6b4c;--alto2:#e0f0e8;--medio:#8a6d1f;--medio2:#f7efd9;--bajo:#7a8896;--bajo2:#eef1f4;
+--marca:#b35418;--marca2:#f7e9de}
+@media(prefers-color-scheme:dark){:root{--papel:#0e151c;--panel:#16202b;--panel2:#1d2934;
+--tinta:#e6ecf2;--tinta2:#a9b7c4;--tinta3:#7c8b99;--linea:#26333f;--acento:#7fb2d8;--acento2:#1a2e3e;
+--alto:#63b893;--alto2:#16301f;--medio:#d8b45c;--medio2:#2e2716;--bajo:#7c8b99;--bajo2:#1d2934;
+--marca:#e0904f;--marca2:#332316}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--papel);color:var(--tinta);
+font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+a{color:var(--acento)}
+.barra{background:var(--panel);border-bottom:1px solid var(--linea);position:sticky;top:0;z-index:20}
+.barra .fila{max-width:1180px;margin:0 auto;padding:10px 18px;display:flex;gap:16px;
+align-items:center;flex-wrap:wrap}
+.marca-sitio{font-weight:600;font-size:16px;margin-right:4px}
+.tabs{display:flex;gap:4px}
+.tabs a{padding:6px 13px;border-radius:7px;text-decoration:none;color:var(--tinta2);font-size:14px}
+.tabs a.on{background:var(--acento2);color:var(--acento);font-weight:600}
+.kpis{margin-left:auto;display:flex;gap:15px;font-size:12.5px;color:var(--tinta3);flex-wrap:wrap}
+.kpis b{color:var(--tinta);font-variant-numeric:tabular-nums}
+/* Los KPI que llevan a un filtro se ven como texto hasta que se los apunta:
+   la barra es para mirar de reojo, no un menu mas. */
+.kpis a{color:inherit;text-decoration:none;border-bottom:1px dotted transparent;
+padding-bottom:1px}
+.kpis a:hover{color:var(--acento);border-bottom-color:currentColor}
+.kpis a:hover b{color:var(--acento)}
+main{max-width:1180px;margin:0 auto;padding:18px}
+.filtros{background:var(--panel);border:1px solid var(--linea);border-radius:10px;
+padding:13px 15px;margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.campo{display:flex;flex-direction:column;gap:3px}
+.campo label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tinta3)}
+input,select,button{font:inherit;font-size:14px;padding:6px 9px;border-radius:7px;
+border:1px solid var(--linea);background:var(--panel);color:var(--tinta)}
+input[type=number]{width:105px}input[type=search]{width:190px}
+button{cursor:pointer;background:var(--acento);color:#fff;border-color:transparent;font-weight:600}
+button.sec{background:var(--panel2);color:var(--tinta2);font-weight:400}
+.chk{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--tinta2);padding-bottom:7px}
+
+/* El cajon de filtros. En pantalla grande el <summary> sobra y se esconde: los
+   filtros se ven siempre, como hasta ahora. En el celular ocupaban una pantalla
+   entera antes de la primera propiedad, asi que arrancan plegados (lo pliega el
+   script; sin JS quedan abiertos, que es el comportamiento de siempre). */
+.cajon{margin-bottom:16px}
+.cajon>summary{display:none}
+.cajon .filtros{margin-bottom:0}
+
+@media(max-width:700px){
+  main{padding:12px 12px 28px}
+  .barra .fila{padding:8px 12px;gap:10px}
+  .marca-sitio{font-size:15px}
+  .kpis{margin-left:0;width:100%;gap:12px;font-size:12px;order:3}
+  .tabs a{padding:7px 14px}
+
+  /* 16px o menos hace que iOS Safari zoomee solo al tocar un campo, y despues
+     la pagina queda corrida para el costado. */
+  input,select,button{font-size:16px;padding:9px 10px}
+  .cajon>summary{display:flex;align-items:center;gap:8px;cursor:pointer;
+    list-style:none;background:var(--panel);border:1px solid var(--linea);
+    border-radius:10px;padding:11px 14px;font-weight:600;color:var(--tinta2);
+    user-select:none}
+  .cajon>summary::-webkit-details-marker{display:none}
+  .cajon>summary::after{content:'▾';margin-left:auto;color:var(--tinta3)}
+  .cajon[open]>summary{border-radius:10px 10px 0 0;border-bottom:none}
+  .cajon[open]>summary::after{content:'▴'}
+  .cajon[open] .filtros{border-radius:0 0 10px 10px}
+  .filtros{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end}
+  .campo{min-width:0}
+  input,select{width:100%}
+  input[type=number],input[type=search]{width:100%}
+  .chk,.filtros>button,.filtros>a{grid-column:1/-1}
+  .campo:has(input[type=search]){grid-column:1/-1}
+  .filtros>button,.filtros>a>button{width:100%;padding:12px}
+  .chk{padding-bottom:0}
+}
+
+/* ---- listado ---- */
+.ficha{background:var(--panel);border:1px solid var(--linea);border-radius:10px;
+padding:14px 16px;margin-bottom:10px;display:grid;
+grid-template-columns:58px 116px 1fr auto;gap:15px;align-items:start}
+.ficha.sinfoto{grid-template-columns:58px 1fr auto}
+.foto{width:116px;height:84px;object-fit:cover;border-radius:7px;
+background:var(--panel2);display:block}
+@media(max-width:700px){
+/* En el celular la foto es lo que mas rapido descarta una propiedad, asi que
+   se queda y lo que se va es la columna del puntaje: pasa a ser una insignia
+   en la esquina, que funciona igual con foto y sin foto. El precio y los
+   botones bajan a un pie a todo el ancho. */
+.ficha{position:relative;padding:12px;gap:12px;
+  grid-template-columns:104px 1fr;grid-template-areas:"foto cuerpo" "pie pie"}
+.ficha.sinfoto{grid-template-columns:1fr;grid-template-areas:"cuerpo" "pie"}
+.tapa{grid-area:foto}
+.cuerpo{grid-area:cuerpo;min-width:0}
+.foto{width:104px;height:104px}
+.pts{position:absolute;top:11px;right:12px;display:flex;align-items:baseline;gap:3px}
+.pts b{font-size:17px}
+.pts span{font-size:9px}
+.tit{padding-right:46px}
+.precio{grid-area:pie;text-align:left;white-space:normal;display:flex;
+  flex-wrap:wrap;align-items:baseline;gap:2px 12px;
+  border-top:1px solid var(--linea);padding-top:10px}
+.precio span:empty{display:none}
+.acciones{width:100%;margin-top:6px;gap:8px}
+.acciones button{flex:1;padding:11px 8px;font-size:14px}
+.enmapa{padding:11px 10px;font-size:13px}
+.paginas{gap:18px;font-size:16px}
+.paginas a{padding:10px 4px}
+}
+.pts{text-align:center}
+.pts b{display:block;font-size:23px;line-height:1;font-variant-numeric:tabular-nums}
+.pts.alto b{color:var(--alto)}.pts.medio b{color:var(--medio)}.pts.bajo b{color:var(--bajo)}
+.pts span{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--tinta3)}
+.tit{font-weight:600;font-size:15.5px;margin-bottom:2px}
+.tit a{color:var(--tinta);text-decoration:none}.tit a:hover{color:var(--acento)}
+.meta{color:var(--tinta2);font-size:13px;margin-bottom:6px}
+.motivos{font-size:12.5px;color:var(--tinta2);margin:6px 0 0;padding-left:16px}
+.motivos li{margin-bottom:2px}
+.chip{display:inline-block;font-size:10.5px;padding:1.5px 7px;border-radius:9px;
+background:var(--panel2);color:var(--tinta2);margin-right:4px}
+.chip.b{background:var(--alto2);color:var(--alto);font-weight:600}
+.chip.o{background:var(--marca2);color:var(--marca)}
+.precio{text-align:right;white-space:nowrap}
+.precio b{font-size:17px;display:block;font-variant-numeric:tabular-nums}
+.precio span{color:var(--tinta3);font-size:12px;display:block}
+.acciones{display:flex;gap:5px;margin-top:8px;justify-content:flex-end;
+align-items:center;flex-wrap:wrap}
+.enmapa{font-size:12.5px;text-decoration:none;color:var(--tinta2);
+border:1px solid var(--linea);border-radius:6px;padding:4px 9px;white-space:nowrap}
+.enmapa:hover{color:var(--acento);border-color:var(--acento)}
+.acciones button{padding:4px 9px;font-size:12.5px;border-radius:6px}
+.acciones .si{background:var(--alto2);color:var(--alto);border-color:transparent;font-weight:600}
+.acciones .no{background:var(--panel2);color:var(--tinta2);border-color:transparent;font-weight:400}
+.acciones .limpiar{background:transparent;color:var(--tinta3);border:1px solid var(--linea);font-weight:400}
+.acciones .anotar{background:transparent;color:var(--tinta3);border:1px solid var(--linea);font-weight:400}
+.acciones .anotar:hover{color:var(--acento);border-color:var(--acento)}
+.acciones .fin{background:transparent;color:var(--tinta3);border:1px solid var(--linea);font-weight:400}
+.acciones .fin:hover{color:var(--marca);border-color:var(--marca)}
+/* La marca de otro se ve, pero mas apagada que la propia: es informacion
+   sobre el otro, no sobre lo que uno decidio. */
+a.chip.edificio{text-decoration:none;background:var(--marca2);color:var(--marca)}
+a.chip.edificio:hover{text-decoration:underline}
+.nota{margin:6px 0 0;padding:6px 9px;border-radius:7px;background:var(--panel2);
+font-size:13px;color:var(--tinta2);border-left:3px solid var(--linea)}
+.nota.mia{border-left-color:var(--acento)}
+/* El cuadro para escribir el motivo, dentro de la ficha que uno esta
+   decidiendo. Va como una fila propia de la grilla y a todo el ancho: la
+   columna del precio son 140 px y ahi no se puede escribir nada. */
+.anotador{grid-column:1/-1;width:100%;text-align:left;white-space:normal;
+border-top:1px solid var(--linea);padding-top:10px}
+.anotador textarea{width:100%;font:inherit;font-size:13.5px;padding:7px 9px;
+border:1px solid var(--acento);border-radius:7px;background:var(--panel);
+color:var(--tinta);resize:vertical}
+.anotador .botonera{display:flex;gap:6px;align-items:center;margin-top:6px}
+.anotador .ayuda{font-size:11.5px;color:var(--tinta3);margin-left:auto}
+.anotador button{padding:5px 11px;font-size:13px;border-radius:6px;white-space:nowrap}
+.anotador .dice{margin:0 0 8px;font-size:13.5px;color:var(--tinta2)}
+/* Borrar es lo unico que no se deshace desde acá: el boton lo dice. */
+.anotador .peligro{background:var(--marca);color:#fff;border-color:transparent;
+font-weight:600}
+@media(max-width:700px){
+  /* La ayuda la dice el placeholder; al lado de los botones solo estorba. */
+  .anotador .ayuda{display:none}
+  .anotador button{padding:10px 14px;font-size:14px}
+}
+/* Apagar la ficha quiere decir "esto lo descarte", no "esto esta marcado".
+   Aplicado a las dos marcas, entrar a "Me interesan" mostraba la lista entera
+   en gris, como si estuviera deshabilitada. */
+.descartada{opacity:.62}
+.paginas{display:flex;gap:8px;justify-content:center;align-items:center;margin:22px 0;color:var(--tinta3)}
+.vacio{text-align:center;padding:50px 20px;color:var(--tinta3)}
+.unasola{background:var(--acento2);color:var(--acento);border-radius:8px;
+padding:10px 14px;margin:0 0 12px;font-size:13.5px}
+
+/* ---- mapa ---- */
+#mapa{height:calc(100vh - 190px);min-height:440px;border:1px solid var(--linea);
+border-radius:10px;background:var(--panel2)}
+.leyenda{display:flex;gap:14px;align-items:center;margin:0 0 12px;font-size:13px;color:var(--tinta2);flex-wrap:wrap}
+.bolita{display:inline-block;width:11px;height:14px;margin-right:5px;
+vertical-align:-3px;clip-path:polygon(50% 100%,0 38%,0 0,100% 0,100% 38%);
+border-radius:50% 50% 0 0}
+/* Leaflet le pone fondo y borde propios a los divIcon; hay que sacarlos o cada
+   pin queda dentro de un cuadradito blanco. */
+.pin{background:none;border:0;filter:drop-shadow(0 1px 2px rgba(0,0,0,.45))}
+.pin-foco{filter:drop-shadow(0 2px 5px rgba(0,0,0,.5));animation:latir 1.4s ease-out 3}
+@keyframes latir{0%{transform:translateY(0)}
+  22%{transform:translateY(-7px)}45%{transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.pin-foco{animation:none}}
+.pop b{font-size:14px}.pop .d{color:#555;font-size:12.5px;margin:3px 0}
+.pop .enlaces{display:flex;gap:12px;margin-top:6px}
+.pop .enlaces a{display:inline-block}
+@media(max-width:700px){
+  /* 100vh en el celular cuenta la barra del navegador que se esconde al
+     scrollear, asi que el mapa quedaba mas alto que la pantalla. svh es la
+     altura con la barra visible, que es la que hay cuando entras. */
+  #mapa{height:calc(100svh - 250px);min-height:340px}
+  .leyenda{gap:10px;font-size:12px;margin-bottom:10px}
+  .leyenda span:last-child{margin-left:0;width:100%}
+}
+
+/* Mensaje flotante de error al marcar. */
+#aviso{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:60;
+background:var(--marca);color:#fff;padding:9px 16px;border-radius:8px;font-size:14px;display:none}

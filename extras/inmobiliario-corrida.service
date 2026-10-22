@@ -1,0 +1,10 @@
+# Unidad de usuario de systemd (Linux). Instalación en el README.
+# Completá RUTA_AL_PROYECTO con la carpeta donde descargaste el proyecto.
+[Unit]
+Description=Buscador inmobiliario: recolectar, informe y avisos
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh RUTA_AL_PROYECTO/extras/corrida-diaria.sh
+# La corrida completa tarda varias horas; no la cortes por tiempo.
+TimeoutStartSec=infinity

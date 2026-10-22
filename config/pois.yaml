@@ -1,0 +1,75 @@
+# ---------------------------------------------------------------------------
+# PUNTOS DE INTERES
+#
+# Cada POI levanta el peso efectivo del barrio para las propiedades que caen
+# dentro de su radio. Es lo que permite encontrar bolsones buenos dentro de
+# barrios mediocres (las cinco cuadras del Hospital Italiano en Almagro).
+#
+#   radio_m : distancia hasta donde aplica el bonus
+#   bonus   : cuanto suma al peso del barrio en el centro del radio
+#             (decae linealmente hasta 0 en el borde del radio)
+#
+# La suma de bonus esta saturada (ver config.yaml: bonus_poi_max) para que
+# un depto rodeado de cinco POIs no rompa el ranking.
+#
+# Ubicacion: puede darse como 'direccion' (se geocodifica con USIG y se
+# cachea) o como 'lat'/'lon' explicitos cuando no hay altura de calle.
+# ---------------------------------------------------------------------------
+
+pois:
+
+  # ======================= UNIVERSIDADES =======================
+  # Motor de alquiler estudiantil: contratos largos, demanda estable,
+  # y en el caso del ex Tiro Federal, oferta que todavia no existe.
+
+  - nombre: Ex Tiro Federal (nuevo polo universitario)
+    tipo: universidad
+    lat: -34.5406
+    lon: -58.4487
+    radio_m: 900
+    bonus: 4.0
+    nota: "Zona de interes: se estan construyendo universidades."
+
+  - nombre: Ciudad Universitaria UBA
+    tipo: universidad
+    lat: -34.5427          # sin altura de calle usable, USIG no la ubica
+    lon: -58.4419
+    radio_m: 1000
+    bonus: 3.0
+  - {nombre: Universidad Torcuato Di Tella, tipo: universidad, direccion: "Figueroa Alcorta 7350", radio_m: 800, bonus: 2.5}
+  - {nombre: UBA Derecho, tipo: universidad, direccion: "Figueroa Alcorta 2263", radio_m: 800, bonus: 2.5}
+  - {nombre: UBA Medicina, tipo: universidad, direccion: "Paraguay 2155", radio_m: 800, bonus: 2.5}
+  - {nombre: UBA Ingenieria, tipo: universidad, direccion: "Las Heras 2214", radio_m: 700, bonus: 2.0}
+  - {nombre: UBA Economicas, tipo: universidad, direccion: "Cordoba 2122", radio_m: 800, bonus: 2.5}
+  - {nombre: UTN Medrano, tipo: universidad, direccion: "Medrano 951", radio_m: 700, bonus: 2.0}
+  - {nombre: Universidad de Palermo, tipo: universidad, direccion: "Mario Bravo 1050", radio_m: 700, bonus: 2.0}
+  - {nombre: USAL, tipo: universidad, direccion: "Callao 1000", radio_m: 600, bonus: 1.5}
+  - {nombre: UADE, tipo: universidad, direccion: "Lima 717", radio_m: 800, bonus: 2.0}
+    # UADE esta al sur de Rivadavia: el POI queda afuera de la zona pero su
+    # radio alcanza Congreso y Balvanera norte, que si estan adentro.
+
+  # ======================= HOSPITALES PRIVADOS =======================
+  # Doble demanda: residentes/medicos (contrato largo, inquilino solvente)
+  # y acompanantes de pacientes (temporario, tarifa alta, sin estacionalidad).
+
+  - {nombre: Hospital Italiano, tipo: hospital, direccion: "Gascon 450", radio_m: 900, bonus: 3.5}
+  - {nombre: Hospital Aleman, tipo: hospital, direccion: "Pueyrredon 1640", radio_m: 800, bonus: 3.0}
+  - {nombre: Clinica y Maternidad Suizo Argentina, tipo: hospital, direccion: "Pueyrredon 1461", radio_m: 700, bonus: 2.5}
+  - {nombre: Sanatorio Otamendi, tipo: hospital, direccion: "Azcuenaga 870", radio_m: 700, bonus: 2.5}
+  - {nombre: Sanatorio Anchorena, tipo: hospital, direccion: "Anchorena 1872", radio_m: 700, bonus: 2.0}
+  - {nombre: Sanatorio Guemes, tipo: hospital, direccion: "Francisco Acuna de Figueroa 1240", radio_m: 700, bonus: 2.5}
+  - {nombre: Sanatorio Mater Dei, tipo: hospital, direccion: "San Martin de Tours 2952", radio_m: 600, bonus: 2.0}
+  - {nombre: Sanatorio Trinidad Palermo, tipo: hospital, direccion: "Cervino 4720", radio_m: 600, bonus: 2.0}
+  - {nombre: FLENI, tipo: hospital, direccion: "Montaneses 2325", radio_m: 800, bonus: 2.5}
+    # FLENI recibe muchas derivaciones del interior -> acompanantes de larga estadia.
+  - {nombre: ICBA, tipo: hospital, direccion: "Blanco Encalada 1543", radio_m: 700, bonus: 2.0}
+  - {nombre: CEMIC Saavedra, tipo: hospital, direccion: "Galvan 4102", radio_m: 800, bonus: 2.5}
+  - {nombre: Sanatorio Finochietto, tipo: hospital, direccion: "Cordoba 2678", radio_m: 600, bonus: 1.5}
+
+  # ======================= HOSPITALES PUBLICOS =======================
+  # Peores para temporario, muy buenos para inquilino-residente.
+
+  - {nombre: Hospital de Clinicas UBA, tipo: hospital_publico, direccion: "Cordoba 2351", radio_m: 800, bonus: 2.0}
+  - {nombre: Hospital Durand, tipo: hospital_publico, direccion: "Diaz Velez 5044", radio_m: 700, bonus: 1.5}
+  - {nombre: Hospital Fernandez, tipo: hospital_publico, direccion: "Cervino 3356", radio_m: 700, bonus: 1.5}
+  - {nombre: Hospital Rivadavia, tipo: hospital_publico, direccion: "Las Heras 2670", radio_m: 700, bonus: 1.5}

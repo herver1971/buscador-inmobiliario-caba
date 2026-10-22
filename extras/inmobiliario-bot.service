@@ -1,0 +1,14 @@
+# OPCIONAL (solo si usás Telegram): deja corriendo el proceso que atiende los
+# botones de «me interesa» / «no me interesa» de los avisos.
+# Completá RUTA_AL_PROYECTO con la carpeta donde descargaste el proyecto.
+[Unit]
+Description=Buscador inmobiliario: botones de Telegram
+
+[Service]
+WorkingDirectory=RUTA_AL_PROYECTO
+ExecStart=RUTA_AL_PROYECTO/.venv/bin/python -m inmobiliario escuchar
+Restart=on-failure
+RestartSec=30
+
+[Install]
+WantedBy=default.target

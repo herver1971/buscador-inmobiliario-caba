@@ -1,0 +1,81 @@
+# ---------------------------------------------------------------------------
+# PESO DE INTERES POR BARRIO Y TIPO DE PROPIEDAD  (0 a 10)
+#
+#   0  = no interesa ahi -> se descarta (filtro duro)
+#   10 = maximo interes
+#
+# El peso NO pertenece al barrio sino al par barrio+tipo: Villa Luro vale 5
+# para casa o PH y 2 para departamento; Palermo al reves.
+#
+# El peso funciona como factor sobre el puntaje final, y los puntos de interes
+# (ver pois.yaml) lo levantan localmente: un depto a 400 m del Hospital
+# Italiano puntua como si estuviera en un barrio de peso mayor.
+#
+# Para ampliar la busqueda: subir numeros. Para achicarla: bajarlos.
+# Nunca hace falta tocar codigo.
+#
+# CASA EN 0 EN TODOS LADOS (decision de diseño): en Versalles hay
+# 69 casas en venta y ninguna por debajo de USD 198.000; en Villa Devoto 342 y
+# solo 2 bajo 130.000. Las casas estan fuera del presupuesto. Para reactivarlas
+# hay que subirles el peso aca Y descomentar precio.por_tipo.casa en config.yaml.
+# ---------------------------------------------------------------------------
+
+barrios:
+  # --- Norte, maximo interes ---
+  Palermo:               {depto: 9, ph: 3, casa: 0}
+  Nunez:                 {depto: 9, ph: 4, casa: 0}
+  Belgrano:              {depto: 8, ph: 3, casa: 0}
+
+  # --- Norte / centro, interes alto ---
+  Colegiales:            {depto: 7, ph: 5, casa: 0}
+  Villa Urquiza:         {depto: 7, ph: 5, casa: 0}
+  Villa Crespo:          {depto: 7, ph: 6, casa: 0}
+  Recoleta:              {depto: 7, ph: 2, casa: 0}
+  Caballito:             {depto: 7, ph: 5, casa: 0}
+
+  # --- Interes medio ---
+  Almagro:               {depto: 5, ph: 4, casa: 0}
+  Saavedra:              {depto: 5, ph: 5, casa: 0}
+  Coghlan:               {depto: 5, ph: 5, casa: 0}
+  Chacarita:             {depto: 5, ph: 5, casa: 0}
+  Villa Devoto:          {depto: 5, ph: 5, casa: 0}
+  Villa del Parque:      {depto: 5, ph: 5, casa: 0}
+  Monte Castro:          {depto: 4, ph: 5, casa: 0}
+  Versalles:             {depto: 3, ph: 6, casa: 0}
+  Villa Pueyrredon:      {depto: 4, ph: 5, casa: 0}
+  Villa Ortuzar:         {depto: 4, ph: 4, casa: 0}
+  Parque Chas:           {depto: 4, ph: 4, casa: 0}
+
+  # --- Oeste / interes bajo ---
+  La Paternal:           {depto: 3, ph: 4, casa: 0}
+  Villa General Mitre:   {depto: 3, ph: 4, casa: 0}
+  Villa Santa Rita:      {depto: 3, ph: 4, casa: 0}
+  Villa Real:            {depto: 3, ph: 5, casa: 0}
+  Floresta:              {depto: 3, ph: 4, casa: 0}
+  Flores:                {depto: 3, ph: 3, casa: 0}
+  Velez Sarsfield:       {depto: 2, ph: 4, casa: 0}
+  Villa Luro:            {depto: 2, ph: 5, casa: 0}   # PH al nivel de Versalles
+  Agronomia:             {depto: 2, ph: 3, casa: 0}
+  Liniers:               {depto: 1, ph: 3, casa: 0}
+
+  # --- Centro: solo departamento, y poco ---
+  Balvanera:             {depto: 2, ph: 1, casa: 0}
+  San Nicolas:           {depto: 2, ph: 0, casa: 0}
+  Retiro:                {depto: 3, ph: 0, casa: 0}
+  Monserrat:             {depto: 1, ph: 0, casa: 0}
+
+  # --- Fuera de presupuesto, se dejan en 0 para que no ocupen lugar ---
+  Puerto Madero:         {depto: 0, ph: 0, casa: 0}
+
+# Barrios partidos por Av. Rivadavia: la mitad sur no sirve.
+# El recorte fino lo hace geo.py con la direccion; esto es solo documentacion.
+partidos_por_rivadavia:
+  - Caballito       # con excepcion: se aceptan unas cuadras al sur (ver config.yaml)
+  - Flores
+  - Floresta
+  - Velez Sarsfield
+  - Villa Luro
+  - Liniers
+  - Balvanera
+  - San Nicolas
+  - Monserrat
