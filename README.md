@@ -64,8 +64,8 @@ gestor de tu sistema (`sudo apt install python3 python3-venv` en Debian/Ubuntu;
 
 Cualquiera de las dos:
 
-- con git: `git clone <URL-del-repositorio>` y entrá a la carpeta; o
-- en la página del repositorio, **Code → Download ZIP**, descomprimilo y entrá a
+- con git: `git clone https://github.com/herver1971/buscador-inmobiliario-caba.git` y entrá a la carpeta `buscador-inmobiliario-caba`; o
+- en <https://github.com/herver1971/buscador-inmobiliario-caba>, **Code → Download ZIP**, descomprimilo y entrá a
   la carpeta.
 
 ### Crear el entorno e instalar las dependencias
