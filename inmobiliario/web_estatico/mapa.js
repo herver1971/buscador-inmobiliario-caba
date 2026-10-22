@@ -13,8 +13,11 @@ if (cajon && window.matchMedia('(max-width:700px)').matches
 }
 
 const mapa = L.map('mapa').setView([-34.588, -58.44], 12);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
+  // La página va con no-referrer y OSM rechaza con 403 las teselas sin Referer
+  // (su política de uso): solo a ellas se les manda el origen.
+  referrerPolicy: 'strict-origin-when-cross-origin',
   attribution: '&copy; colaboradores de <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(mapa);
 
