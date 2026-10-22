@@ -33,6 +33,12 @@ cambia desde `config/`).
 - Unos 200 MB libres. La primera corrida completa tarda **varias horas** (ver
   más abajo) y la compu tiene que quedar prendida.
 
+**No necesitás ninguna clave ni cuenta.** El proyecto no trae credenciales de
+nadie: los portales, el mapa, la cotización del dólar y la ubicación de
+direcciones (USIG, del Gobierno de la Ciudad) son servicios públicos y gratuitos.
+Lo único tuyo que puede llegar a pedirte es el token de **tu propio** bot de
+Telegram, y solo si querés los avisos (sección 6).
+
 ### Instalar Python
 
 **Windows**
